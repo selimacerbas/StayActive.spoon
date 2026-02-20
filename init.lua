@@ -28,6 +28,7 @@ obj.defaultHotkeys = {
 -- ===============
 obj._timer = nil
 obj._menubar = nil
+obj._indicator = nil
 
 -- ===============
 -- Core
@@ -38,6 +39,31 @@ function obj:_jiggle()
     hs.timer.doAfter(0.05, function()
         hs.mouse.absolutePosition(pos)
     end)
+end
+
+function obj:_showIndicator()
+    if self._indicator then return end
+    local scr = hs.screen.mainScreen():frame()
+    local size = 10
+    local cv = hs.canvas.new({ x = scr.x + scr.w - size - 6, y = scr.y + 6, w = size, h = size })
+    cv:level(hs.canvas.windowLevels.overlay)
+    if cv.behaviorAsLabels then
+        cv:behaviorAsLabels({ "canJoinAllSpaces", "ignoresMouseEvents" })
+    end
+    cv[1] = {
+        type = "circle",
+        action = "fill",
+        fillColor = { red = 0.2, green = 0.85, blue = 0.3, alpha = 0.9 },
+    }
+    cv:show()
+    self._indicator = cv
+end
+
+function obj:_hideIndicator()
+    if self._indicator then
+        self._indicator:delete()
+        self._indicator = nil
+    end
 end
 
 function obj:start()
@@ -54,9 +80,11 @@ function obj:start()
         end)
     end
 
+    self:_showIndicator()
     self:_jiggle()
     self._timer = hs.timer.doEvery(self.interval, function() self:_jiggle() end)
 
+    hs.alert.show("StayActive: ON")
     self.logger.i("StayActive started (interval: " .. self.interval .. "s)")
     return self
 end
@@ -70,7 +98,9 @@ function obj:stop()
         self._menubar:delete()
         self._menubar = nil
     end
+    self:_hideIndicator()
 
+    hs.alert.show("StayActive: OFF")
     self.logger.i("StayActive stopped")
     return self
 end
