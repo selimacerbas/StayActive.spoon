@@ -34,10 +34,17 @@ obj._indicator = nil
 -- Core
 -- ===============
 function obj:_jiggle()
+    -- Skip if Mission Control is open (PaperWM uses MC for window moves)
+    if hs.spaces.missionControlSpaceNames then
+        local ok, active = pcall(hs.spaces.isMissionControlActive)
+        if ok and active then return end
+    end
     local pos = hs.mouse.absolutePosition()
-    hs.mouse.absolutePosition({ x = pos.x + self.jiggleAmount, y = pos.y })
+    local moved = { x = pos.x + self.jiggleAmount, y = pos.y }
+    -- Post real mouse events so the OS idle timer actually resets
+    hs.eventtap.event.newMouseEvent(hs.eventtap.event.types.mouseMoved, moved):post()
     hs.timer.doAfter(0.05, function()
-        hs.mouse.absolutePosition(pos)
+        hs.eventtap.event.newMouseEvent(hs.eventtap.event.types.mouseMoved, pos):post()
     end)
 end
 
