@@ -6,7 +6,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "StayActive"
-obj.version = "0.1.0"
+obj.version = "0.2.0"
 obj.author = "Selim Acerbas"
 obj.homepage = "https://github.com/selimacerbas/StayActive.spoon"
 obj.license = "MIT"
